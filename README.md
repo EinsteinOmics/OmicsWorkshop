@@ -8,7 +8,8 @@ An asynchronous learning workshop introducing key topics in Omics. For schedule 
 
 ## General instructions
 
-Each vignette will be available in three ways:
+The Omics Workshop sessions will feature code examples with real data, which we call "vignettes". Each vignette will be available in three ways:
+
 1. Jupyter Notebook files (.ipynb), for those who want to follow along interactively using the HPC Jupyter workflow, where all software has been pre-configured
 2. local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers ("locally"). Note that you must install relevant software packages for each vignette
 3. pre-run HTML files, for those who want to follow along on their computer without any interactive coding (scroll to bottom for this)
