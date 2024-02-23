@@ -8,7 +8,7 @@ An asynchronous learning workshop introducing key topics in Omics.
 
 Each vignette will be made avaialable in three ways:
 - Jupyter Notebook files (.ipynb), for those who want to follow along interactively using the HPC Jupyter workflow, where all software has been pre-configured
-- local RMarkdown or Jupyter files, for those who want to follow along interactively using on their local systems
+- local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers. Note that you must install relevant software packages for each vignette.
 - pre-run HTML files, for those who want to follow along locally without any code
 
 <br />
