@@ -63,6 +63,15 @@ Once you have logged on to https://cluster.einsteinmed.edu/, and opened the rele
 
 When you first open the Jupyter notebook, you may be prompted to select a kernel. Alternatively you can always switch kernal at the top right of the notebook. You should select either "omics-workshop-R" or "omics-workshop-python" based on the vignette.
 
+Use "omics-workshop-R" for the following vignettes:
+- 03_BulkRNAATAC_KithXiang
+- 05_scATAC_LindsayAnthony
+- 06_scRNA_DeyouAlex
+
+Use "omics-workshop-python" for the following vignettes:
+- 04_AncestryAnalysis_SriDavid
+- 07_Proteomics_SimoneJuan
+
 
 <br />
 <br />
