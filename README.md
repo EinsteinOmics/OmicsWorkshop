@@ -2,12 +2,17 @@
 
 An asynchronous learning workshop introducing key topics in Omics.
 
+<br />
+
 ## General instructions
 
 Each vignette will be made avaialable in three ways:
 - Jupyter Notebook files (.ipynb), for those who want to follow along interactively using the HPC Jupyter workflow, where all software has been pre-configured
 - local RMarkdown or Jupyter files, for those who want to follow along interactively using on their local systems
 - pre-run HTML files, for those who want to follow along locally without any code
+
+<br />
+<br />
 
 
 ## HPC guide
@@ -20,6 +25,8 @@ To follow along on HPC, it is absolutely necessary that you sign up for an HPC a
 
 If you run into errors, you can reach out to us or submit an IT ticket.
 
+<br />
+<br />
 
 ## Instructions for downloading code vignettes
 
@@ -32,7 +39,7 @@ For HPC usage: first, try to activate the Jupyter workflow on https://cluster.ei
 - Once there, use the "cd" command to get to the pw folder in your home directory: `cd ~/pw/`.
 - Finally, you can download the scripts: `git clone https://github.com/EinsteinOmics/OmicsWorkshop.git`
 
-
+<br />
 
 ### 2. Folder Mounting to HPC just like data.einsteinmed.edu
 
@@ -41,5 +48,15 @@ This makes use of the folder mounting, identical to how data.einsteinmed.edu is 
 
 First, download the vigenttes from Github. This can be done by clicking the big green button that says "Code" at the top of the screen. Then click "Download Zip". Make sure to unzip the file. Then, use the guide above to move the file to HPC. You should place it in the "pw" folder in your home directory.
 
+<br />
+<br />
 
+
+# Further Guides for Specific Vignettes
+
+
+### 03 Bulk RNA-seq and bulk ATAC-seq with Dr. Kith Pradhan (assisted by Xiang Yu Zheng)
+
+Dr. Pradhan has made available a Dropbox link with options for locally running the vignette and a guide for installing the key R software packages such as Deseq2.
+- [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
 
