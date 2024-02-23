@@ -12,13 +12,13 @@ The Omics Workshop sessions will feature code examples with real data, which we 
 
 1. Jupyter Notebook files (.ipynb), for those who want to follow along interactively using the HPC Jupyter workflow, where all software has been pre-configured
 2. local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers ("locally"). Note that you must install relevant software packages for each vignette
-3. pre-run HTML files, for those who want to follow along on their computer without any interactive coding (scroll to bottom for this)
+3. View-only HTML files, for those who want to follow along on their computer without any interactive coding (scroll to bottom for this)
 
 
 <br />
 <br />
 
-## This guide
+## About this guide
 
 This guide will walk you through:
 - Getting yourself onto the HPC and https://cluster.einsteinmed.edu/
@@ -47,6 +47,9 @@ If you run into errors, you can reach out to us or submit an IT ticket.
 ## Getting the code vignettes onto your account on HPC
 
 For HPC usage: first, try to activate the Jupyter workflow on https://cluster.einsteinmed.edu/. This will create a folder in your HPC home directory called "pw". It is recommended to store all vignette code in there to be easily accessible to Jupyter.
+
+
+Then there are two options for downloading the vignettes to your account: a terminal based option with Git, and a non-terminal option of folder mounting similar to data.einsteinmed.edu.
 
 ### 1. Unix shell (bash / zsh / terminal) with `git clone`. 
 
