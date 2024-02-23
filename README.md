@@ -55,7 +55,7 @@ First, download the vigenttes from Github. This can be done by clicking the big 
 # Further Guides for Specific Vignettes
 
 
-### - 03 Bulk RNA-seq and bulk ATAC-seq with Dr. Kith Pradhan (assisted by Xiang Yu Zheng)
+### Bulk RNA-seq and bulk ATAC-seq with Dr. Kith Pradhan (assisted by Xiang Yu Zheng)
 
 Dr. Pradhan has made available a Dropbox link with options for locally the vignette locally, looking along with a non-interactive .HTML file, the main code itself as a .R file, and a guide for installing the key R software packages such as Deseq2.
 - [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
