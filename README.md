@@ -11,13 +11,26 @@ Each vignette will be made avaialable in three ways:
 - local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers ("locally"). Note that you must install relevant software packages for each vignette (scroll to bottom for this)
 - pre-run HTML files, for those who want to follow along on their computer without any interactive coding (scroll to bottom for this)
 
+
+<br />
+<br />
+
+## This guide
+
+This guide will walk you through:
+- Getting yourself onto the HPC and https://cluster.einsteinmed.edu/
+- Getting the code vignettes onto your account on HPC
+- Using pre-installed software packages on cluster.einsteinmed.edu
+- At the bottom are instructions specific to each vignette, including non-HPC options
+
+
 <br />
 <br />
 
 
-## HPC guide
+## Getting yourself on the HPC
 
-To follow along on HPC, it is reqired that you sign up for an HPC account, and access https://cluster.einsteinmed.edu/. Optionally, is also recommended to familiarize yourself with the remote access option (GlobalProtect) for HPC use outside of the EinsteinSecure wifi.
+To follow along on Einstein's High Performance Computer (HPC), it is reqired that you sign up for an HPC account, and access https://cluster.einsteinmed.edu/. Optionally, is also recommended to familiarize yourself with the remote access option (GlobalProtect) for HPC use outside of the EinsteinSecure wifi.
 
 - [HPC account setup](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/SitePages/HPC3.0-UQuick-Start.aspx) - login required. It has all the relevant guides including how to set up HPC account.
 - [cluster.einsteinmed.edu usage](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs%2FIntroduction%20to%20Einstein%20HPC%20Portal%2Dv5%2Epdf&parent=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs) - try to follow this and activate the Jupyter Notebook workflow.
@@ -28,7 +41,7 @@ If you run into errors, you can reach out to us or submit an IT ticket.
 <br />
 <br />
 
-## Instructions for downloading code vignettes
+## Getting the code vignettes onto your account on HPC
 
 For HPC usage: first, try to activate the Jupyter workflow on https://cluster.einsteinmed.edu/. This will create a folder in your HPC home directory called "pw". It is recommended to store all vignette code in there to be easily accessible to Jupyter.
 
