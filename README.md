@@ -39,6 +39,8 @@ For HPC usage: first, try to activate the Jupyter workflow on https://cluster.ei
 - Once there, use the "cd" command to get to the pw folder in your home directory: `cd ~/pw/`.
 - Finally, you can download the scripts: `git clone https://github.com/EinsteinOmics/OmicsWorkshop.git`
 
+- Note that later vignettes will be added. To update the folder once those are added, you can cd into the folder and use `git pull`.
+
 <br />
 
 ### 2. Folder Mounting to HPC just like data.einsteinmed.edu
