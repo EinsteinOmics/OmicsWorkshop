@@ -8,7 +8,7 @@ An asynchronous learning workshop introducing key topics in Omics.
 
 Each vignette will be made avaialable in three ways:
 - Jupyter Notebook files (.ipynb), for those who want to follow along interactively using the HPC Jupyter workflow, where all software has been pre-configured
-- local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers. Note that you must install relevant software packages for each vignette.
+- local RMarkdown or Jupyter files, for those who want to follow along interactively using R or Python on their own computers ("locally"). Note that you must install relevant software packages for each vignette.
 - pre-run HTML files, for those who want to follow along on their computer without any interactive coding.
 
 <br />
@@ -57,6 +57,6 @@ First, download the vigenttes from Github. This can be done by clicking the big 
 
 ### Bulk RNA-seq and bulk ATAC-seq with Dr. Kith Pradhan (assisted by Xiang Yu Zheng)
 
-Dr. Pradhan has made available a Dropbox link with options for locally the vignette locally, looking along with a non-interactive .HTML file, the main code itself as a .R file, and a guide for installing the key R software packages such as Deseq2.
+Dr. Pradhan has made available a Dropbox link with options for running the vignette locally (on your own computer) in R, looking along with a non-interactive .HTML file, the main code itself as a .R file, and a guide for installing the key R software packages such as Deseq2.
 - [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
 
