@@ -44,7 +44,7 @@ For HPC usage: first, try to activate the Jupyter workflow on https://cluster.ei
 ### 2. Folder Mounting to HPC just like data.einsteinmed.edu
 
 This makes use of the folder mounting, identical to how data.einsteinmed.edu is used.
-- [Folder mounting guide](https://it.einsteinmed.edu/documentation/how-to-mount-the-hpc-file-system/) - Note that "einsteinmed.**edu**" should be used in all instances instead of "einsteinmed.**org**" in this guide.
+- [Folder mounting guide](https://it.einsteinmed.edu/documentation/how-to-mount-the-hpc-file-system/) - Note that if "einsteinmed.**org**" as the guide says does not work, you can try "einsteinmed.**edu**" instead.
 
 First, download the vigenttes from Github. This can be done by clicking the big green button that says "Code" at the top of the screen. Then click "Download Zip". Make sure to unzip the file. Then, use the guide above to move the folder to HPC. You should place it in the "pw" folder in your home directory.
 
