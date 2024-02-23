@@ -1,0 +1,23 @@
+.tocify-header {
+  text-indent: initial;
+}
+
+.tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 20px;
+}
+
+.tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 30px;
+}
+
+.tocify-subheader .tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 40px;
+}
+
+.tocify-subheader .tocify-subheader .tocify-subheader > .tocify-item {
+  text-indent: initial;
+  padding-left: 50px;
+}

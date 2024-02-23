@@ -1,0 +1,12 @@
+sbatch slurm_star_hg38.sh starSrini-10 fq/Srini-10_S10_R1_001.fastq.gz fq/Srini-10_S10_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-11 fq/Srini-11_S11_R1_001.fastq.gz fq/Srini-11_S11_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-12 fq/Srini-12_S12_R1_001.fastq.gz fq/Srini-12_S12_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-1 fq/Srini-1_S2_R1_001.fastq.gz fq/Srini-1_S2_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-2 fq/Srini-2_S1_R1_001.fastq.gz fq/Srini-2_S1_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-3 fq/Srini-3_S3_R1_001.fastq.gz fq/Srini-3_S3_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-4 fq/Srini-4_S4_R1_001.fastq.gz fq/Srini-4_S4_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-5 fq/Srini-5_S5_R1_001.fastq.gz fq/Srini-5_S5_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-6 fq/Srini-6_S7_R1_001.fastq.gz fq/Srini-6_S7_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-7 fq/Srini-7_S6_R1_001.fastq.gz fq/Srini-7_S6_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-8 fq/Srini-8_S8_R1_001.fastq.gz fq/Srini-8_S8_R2_001.fastq.gz
+sbatch slurm_star_hg38.sh starSrini-9 fq/Srini-9_S9_R1_001.fastq.gz fq/Srini-9_S9_R2_001.fastq.gz
