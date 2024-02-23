@@ -64,3 +64,5 @@ Note that later vignettes will be added. To download only a certain folder, you 
 Dr. Pradhan has made available a Dropbox link with options for running the vignette locally (on your own computer) in R, looking along with a non-interactive .HTML file, the main code itself as a .R file, and a guide for installing the key R software packages such as Deseq2.
 - [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
 
+For HPC use, the relevant files are Jupyter notebooks ending in .ipynb. For local use, the relevant files are the .Rmd files for interactive code, or the .HTML files for viewing only.
+
