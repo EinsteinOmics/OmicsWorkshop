@@ -23,15 +23,22 @@ If you run into errors, you can reach out to us or submit an IT ticket.
 
 ## Instructions for downloading code vignettes
 
-For HPC usage: first, try to activate the Jupyter workflow on https://cluster.einsteinmed.edu/. This will create a folder in your HPC home directory called "pw". It is recommended to store all folders in there.
+For HPC usage: first, try to activate the Jupyter workflow on https://cluster.einsteinmed.edu/. This will create a folder in your HPC home directory called "pw". It is recommended to store all vignette code in there to be easily accessible to Jupyter.
 
-1. Unix shell (bash / zsh / terminal) with `git clone`. 
+#### 1. Unix shell (bash / zsh / terminal) with `git clone`. 
 
 First, open a Unix shell, such as Mac terminal. On Windows, there are several options including [Git Bash](https://git-scm.com/download/win), [Cygwin](https://www.cygwin.com/), and [WSL](https://learn.microsoft.com/en-us/windows/wsl/about)https://learn.microsoft.com/en-us/windows/wsl/about. 
 
-Next, use `ssh` to get to the HPC. Follow the instructions above, and make sure to use GlobalProtect if off campus. In short, you must use `ssh <username>@<username>.hpc.einsteinmed.edu` (replace <username> with your active domain).
+Next, use `ssh` to get to the HPC. Follow the instructions above, and make sure to use GlobalProtect if off campus. In short, you must use `ssh <username>@<username>.hpc.einsteinmed.edu` (replace <username> with your active domain). Once there, use the `cd` command to get to the pw folder in your home directory: `cd ~/pw/`. Finally, you can download the scripts: `git clone https://github.com/EinsteinOmics/OmicsWorkshop.git`
 
-Once there, use the `cd` command to get to the pw folder in your home directory: `cd ~/pw/`
 
-Finally, you can download the scripts: `git clone `
+
+#### 2. Download the scripts and place them on HPC via data.einsteinmed.edu
+
+This makes use of the folder mounting, identical to how data.einsteinmed.edu is used.
+- [Folder mounting guide](https://it.einsteinmed.edu/documentation/how-to-mount-the-hpc-file-system/) - Note that einsteinmed.edu should be used in all instances instead of einsteinmed.org in this guide.
+
+First, download the vigenttes from Github. This can be done by clicking the big green button that says "Code" at the top of the screen. Then click "Download Zip". Make sure to unzip the file. Then, use the guide above to move the file to HPC. You should place it in the "pw" folder in your home directory.
+
+
 
