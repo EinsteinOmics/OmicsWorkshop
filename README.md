@@ -1,6 +1,6 @@
 # Intro to Omics Workshop Vignettes
 
-An asynchronous learning workshop introducing key topics in Omics. For schedule and other details, see our website: https://einsteinomics.github.io/omics-workshop2024/
+An asynchronous learning workshop introducing key topics in Omics. For schedule, location, and other details, see our website: https://einsteinomics.github.io/omics-workshop2024/
 
 
 
