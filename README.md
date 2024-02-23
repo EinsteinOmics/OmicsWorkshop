@@ -50,7 +50,7 @@ This makes use of the folder mounting, identical to how data.einsteinmed.edu is 
 
 First, download the vigenttes from Github. This can be done by clicking the big green button that says "Code" at the top of the screen. Then click "Download Zip". Make sure to unzip the file. Then, use the guide above to move the folder to HPC. You should place it in the "pw" folder in your home directory.
 
-Note that later vignettes will be added. To download only a certain folder, you can use the steps above, unzip, and transfer only the folder(s) not yet uploaded to your account.
+Note that later vignettes will be added. To download only a certain folder, you can use the steps above, unzip, and transfer only the folder(s) not yet uploaded to your account. You can repeat this once the later vignettes are released.
 
 <br />
 <br />
