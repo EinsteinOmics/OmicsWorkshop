@@ -56,6 +56,16 @@ Note that later vignettes will be added. To download only a certain folder, you 
 <br />
 
 
+
+## Using pre-installed software packages on cluster.einsteinmed.edu
+
+Once you have logged on to https://cluster.einsteinmed.edu/, and opened the relevant vignette files ending in .ipynb, you should load the software packages which have been pre-installed before this workshop. These are implemented as Conda environments configured as Jupyter kernels. This means it is basically one click to use the right software.
+
+When you first open the Jupyter notebook, you may be prompted to select a kernel. Alternatively you can always switch kernal at the top right of the notebook. You should select either "omics-workshop-R" or "omics-workshop-python" based on the vignette.
+
+
+
+
 # Further Guides for Specific Vignettes
 
 
