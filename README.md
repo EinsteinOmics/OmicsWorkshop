@@ -37,6 +37,7 @@ To follow along on Einstein's High Performance Computer (HPC), it is reqired tha
 
 - [HPC account setup](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/SitePages/HPC3.0-UQuick-Start.aspx) - login required. It has all the relevant guides including how to set up HPC account.
 - [cluster.einsteinmed.edu usage](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs%2FIntroduction%20to%20Einstein%20HPC%20Portal%2Dv5%2Epdf&parent=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs) - try to follow this and activate the Jupyter Notebook workflow. Note that it may take a few minutes to start running.
+- [A guide for opening Jupyter Notebooks on cluster.einsteinmed.edu](https://montefioreorg-my.sharepoint.com/:w:/g/personal/marliette_rodriguezmatos_einsteinmed_edu/EXkWAhJ3STJHmjbSm1K0oMUBmfXy24Get2leIsWBRMq-wQ?e=8nE54D), prepared by PhD Candidate and Omics Club board member Marliette Rodriguez Matos.
 - [Remote access to HPC via GlobalProtect](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs%2FIT%2DREF%2D2023%2D094%20Einstein%20Academic%20Research%20Systems%20Portal%282%29%2Epdf&parent=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs)
 
 If you run into errors, you can reach out to us or submit an IT ticket.
@@ -105,5 +106,3 @@ Dr. Pradhan has made available a Dropbox link with options for running the vigne
 - [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
 
 For local use, the relevant files are called "tutorialCode.R" for interactive code, or the .HTML files for viewing only. Note that required software packages are pre-installed and configured on HPC, while for local interactive use, you must install the software before the session. For HPC use, see the guide from the top of this page.
-
-
