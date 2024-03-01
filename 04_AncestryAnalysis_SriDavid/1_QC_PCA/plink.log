@@ -1,0 +1,21 @@
+PLINK v1.90b6.21 64-bit (19 Oct 2020)
+Options in effect:
+  --bfile results/HapMap_3_r3_8
+  --hardy
+
+Hostname: cpu-776.cluster.local
+Working directory: /gs/gsfs0/home/marlrodrig/Anc_Vig-complete_revised_Marli/1_QC_PCA
+Start time: Wed Feb 28 13:05:50 2024
+
+Random number seed: 1709143550
+385506 MB RAM detected; reserving 192753 MB for main workspace.
+1073226 variants loaded from .bim file.
+164 people (80 males, 84 females) loaded from .fam.
+112 phenotype values loaded from .fam.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 112 founders and 52 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.998039.
+--hardy: Writing Hardy-Weinberg report (founders only) to plink.hwe ... done.
+
+End time: Wed Feb 28 13:05:51 2024
