@@ -100,9 +100,17 @@ Use "omics-workshop-python" for the following vignettes:
 # Further Guides for Specific Vignettes
 
 
-### Bulk RNA-seq and bulk ATAC-seq with Dr. Kith Pradhan and Xiang Yu Zheng
+### 03 Dr. Kith Pradhan and Xiang Yu Zheng → bulk RNA/ATAC seq analysis
 
 Dr. Pradhan has made available a Dropbox link with options for running the vignette locally (on your own computer) in R, looking along with a non-interactive .HTML file, the main code itself as a .R file, and a guide for installing the key R software packages such as Deseq2.
 - [Dropbox link to vignette](https://www.dropbox.com/scl/fo/uyo4mtqp9aze1u5ckphe2/h?rlkey=hni2pwjl9p3tiwewpkpljjl82&dl=0)
 
 For local use, the relevant files are called "tutorialCode.R" for interactive code, or the .HTML files for viewing only. Note that required software packages are pre-installed and configured on HPC, while for local interactive use, you must install the software before the session. For HPC use, see the guide from the top of this page.
+
+
+
+### 04 Dr. Srilakshmi Raj and David Yang → Ancestry analysis
+
+HPC option is now available, follow instructions above.
+
+For local use, navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/04_AncestryAnalysis_SriDavid), click on the .html files, click the Download button top right of screen, which looks like an arrow pointing downward.
