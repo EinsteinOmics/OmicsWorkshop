@@ -113,6 +113,7 @@ For local use, the relevant files are called "tutorialCode.R" for interactive co
 ### 04 Dr. Srilakshmi Raj and David Yang → Ancestry analysis
 
 Vignettes are now available. 
+
 For HPC option: If you used git before, you should be able to navigate to the folder and just use `git pull`. If you used the folder mounting method (ie the data.einsteinmed.edu) method, please follow instructions on the [vignette website](https://github.com/EinsteinOmics/OmicsWorkshop).
 
 For local use, navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/04_AncestryAnalysis_SriDavid), click on the .html files, click the Download button top right of screen, which looks like an arrow pointing downward.
