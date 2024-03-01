@@ -59,10 +59,8 @@ Then there are two options for downloading the vignettes to your account: a term
 - Next, use `ssh` to get to the HPC. Follow the instructions above, and make sure to use GlobalProtect if off campus. In short, you must use `ssh username@username.hpc.einsteinmed.edu` (replace "username" with your active domain).
 - Once there, use the "cd" command to get to the pw folder in your home directory: `cd ~/pw/`.
 - Finally, you can download the scripts: `git clone https://github.com/EinsteinOmics/OmicsWorkshop.git`
-- If `git clone` does not work you can also try `git fetch --all` followed by `git reset --hard origin/master`
-
-
 - Note that later vignettes will be added. To update the folder once those are added, you can cd into the folder and use `git pull`.
+- If `git clone` does not work when updating the folders, you can also try `git fetch --all` followed by `git reset --hard origin/main`
 
 <br />
 
