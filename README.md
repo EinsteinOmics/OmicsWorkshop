@@ -107,6 +107,7 @@ Dr. Pradhan has made available a Dropbox link with options for running the vigne
 
 For local use, the relevant files are called "tutorialCode.R" for interactive code, or the .HTML files for viewing only. Note that required software packages are pre-installed and configured on HPC, while for local interactive use, you must install the software before the session. For HPC use, see the guide from the top of this page.
 
+<br />
 
 
 ### 04 Dr. Srilakshmi Raj and David Yang → Ancestry analysis
