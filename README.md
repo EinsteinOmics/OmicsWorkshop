@@ -41,7 +41,6 @@ To follow along on Einstein's High Performance Computer (HPC), it is reqired tha
 - [Remote access to HPC via GlobalProtect](https://montefioreorg.sharepoint.com/sites/Einstein-IT-HPC/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs%2FIT%2DREF%2D2023%2D094%20Einstein%20Academic%20Research%20Systems%20Portal%282%29%2Epdf&parent=%2Fsites%2FEinstein%2DIT%2DHPC%2FShared%20Documents%2FGeneral%2FHPC3%2E0%20docs)
 
 If you run into errors, you can reach out to us or submit an IT ticket.
-- Feb 23 afternoon: Note that there appears to be a system error on cluster.einsteinmed.edu currently - the HPC team is looking into it.
 
 <br />
 <br />
