@@ -123,4 +123,4 @@ For local use, navigate to [this folder](https://github.com/EinsteinOmics/OmicsW
 
 ### 05 Dr. Lindsay LaFave and Anthony Griffen → scATAC-seq
 
-There will only be a view-only .HTML vignette for this session. Please navigate to navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/05_scATAC_LindsayAnthony), click on the .html file, click the Download button top right of screen, which looks like an arrow pointing downward. Or, click the button with three dots on top right and click download.
+There will only be a view-only .HTML vignette for this session. Please navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/05_scATAC_LindsayAnthony), click on the .html file, click the Download button top right of screen, which looks like an arrow pointing downward. Or, click the button with three dots on top right and click download.
