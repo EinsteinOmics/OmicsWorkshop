@@ -124,3 +124,19 @@ For local use, navigate to [this folder](https://github.com/EinsteinOmics/OmicsW
 ### 05 Dr. Lindsay LaFave and Anthony Griffen → scATAC-seq
 
 There will only be a view-only .HTML vignette for this session. Please navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/05_scATAC_LindsayAnthony), click on the .html file, click the Download button top right of screen, which looks like an arrow pointing downward. Or, click the button with three dots on top right and click download.
+
+
+<br />
+
+### 06 Dr. Deyou Zheng and Alexander Ferrena → scRNAseq
+
+- For view only: navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/06_scRNA_DeyouAlex), and download the .HTML file: click on the .html file, then click the Download button top right of screen, which looks like an arrow pointing downward, or click the button with three dots on top right and click download.
+- For interactive use on HPC: see instructions above for details to either use git clone / git pull, or download the folder and transfer to HPC using samba.
+
+
+<br />
+
+### 07 Dr. Simone Sidoli and Juan Sepulveda → Proteomics
+
+- For view only: navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/07_Proteomics_SimoneJuan), and download the .HTML file: click on the .html file, then click the Download button top right of screen, which looks like an arrow pointing downward, or click the button with three dots on top right and click download.
+- For interactive use on HPC: see instructions above for details to either use git clone / git pull, or download the folder and transfer to HPC using samba.
