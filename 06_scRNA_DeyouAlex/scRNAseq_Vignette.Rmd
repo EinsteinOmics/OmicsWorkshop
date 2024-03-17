@@ -1,0 +1,1559 @@
+---
+title: "Clustering and Cell Annotation from scRNA-seq data"
+author: "Alexander Ferrena and Deyou Zheng, PhD"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Single-cell RNA sequencing
+
+This vignette will serve as a tutorial for exploratory analysis of scRNA-seq data, including cell clustering and cell-type annotation.
+
+
+# Overview of this tutorial
+
+In this vignette, we will read in some 10X single-cell RNA-seq data which has been pre-processed with Cellranger, perform cell clustering with Seurat, and try to annotate cell types.
+
+# For more resources:
+
+Please check out: 
+
+Current best practices in single-cell RNA-seq analysis: a tutorial (Luecken & Theis Mol Syst Biol 2019) - https://pubmed.ncbi.nlm.nih.gov/31217225/
+
+Seurat tutorial - https://satijalab.org/seurat/articles/pbmc3k_tutorial
+
+
+
+# Set a Seed
+
+This file is an .RMD file. Below is a code block which can be run by pressing the green arrow.
+
+The code will set a random seed. Many statistical methods have some randomness to them, but setting a seed helps make sure results are reproducible. This should be done for every analysis!
+
+
+```{r setseed}
+
+set.seed(2024)
+
+```
+
+
+
+# Load important libraries
+
+Below we will load import libraries for this analysis. These are software packages that are developed by the R user community (such as various labs) which greatly facilitate analysis.
+
+It may print some messages or information about the software versions.
+
+```{r loadlibs}
+
+library(Seurat)
+library(Matrix)
+library(ggplot2)
+library(patchwork)
+library(magrittr)
+library(dplyr)
+library(clusterProfiler)
+
+
+```
+
+
+
+
+
+# Upstream processing of sequencing data
+
+## Sequencing
+
+For 10X scRNA-seq, sequencing involves first capturing each cell in droplet with microfluidic technology, then performing cell lysis and reverse transcription from RNA to cDNA. Within each cell droplet, each mRNA molecule is captured via its polyA tail, and is given a barcode called a Unique Molecular Identifier (UMI). (Technically, any RNA with a polyA tail can be captured, including for example long non-coding RNA, in addition to mRNA). Additionally, each cell is also given a barcode. As in other areas os science, single-cell RNA-seq is essentially the art of putting labels on everything we possibly can!
+
+Eventually, the cDNA from each cell is pooled. Each cDNA molecule has a cellular barcode to distinguish which cell it came from, and a UMI barcode (signifying the exact mRNA molecule from that cell). The pooled and barcoded cDNA is refered to as a "library" and this process as whole is referred to as "library preparation". An aliquot of the library is placed on an Illumina sequencer. Usually, each library is sequenced to a read depth of about 300 Millon read-pairs at about 100-150 read length. Paired-end sequencing is used, where each cDNA molecule is sequenced from the front 5' and back 3' ends simultaneously. The front end (known as the first of the pair of the "R1" reads) contains information about the barcodes: the cell barcode, and the UMI. The back end (the second of the pair, or the "R2" read) contains the actual cDNA sequence derived from the mRNA molecule.
+
+Sequencing produces an output which is very often pre-processed to a file containing raw sequence reads (ATGC DNA bases) and sequencing quality information. This file is called a "FASTQ" file. There will always be a pair, R1 and R2, for the paired end sequencing as described above.
+
+## Computational pre-processing of 10X sequence data
+
+Once we have FASTQ files, computational analysis of the data begins. This involves cell demultiplexing and read alignment to a reference genome. This can be done with the 10X software, For more information, see this link:
+https://www.10xgenomics.com/support/software/cell-ranger/latest/getting-started/cr-what-is-cell-ranger
+
+FASTQ files are extremely large files with very dense information. Because of this, Cellranger is a very memory-intensive and time-consuming process. As such, Cellranger itself is beyond the scope of this tutorial and we will work directly with the outputs. However, some example code for running cellranger can be found below:
+
+
+NON-RUNNABLE BLOCK OF UNIX / BASH CODE FOR RUNNING CELLRANGER ON HPC IS BELOW FOR EXAMPLE PURPOSES ONLY (feel free to copy):
+```
+
+#prep input and output paths
+#indir: contains the R1 and R2 FASTQ files
+indir=/gs/gsfs0/users/username/path/to/data
+
+#outdir: outputs will be stored here
+outdir=/gs/gsfs0/users/username/path/to/output
+
+#prep path to reference genome
+# refs for most species can be found here:
+# https://www.10xgenomics.com/support/software/cell-ranger/downloads#reference-downloads
+ref=/gs/gsfs0/users/username/path/to/reference/genome
+
+
+
+#run cellranger count with 10 CPUs and 100GB of memory
+cellranger count --id=SampleName \
+--transcriptome=$ref \
+--fastqs=$indir \
+--localcores=10 \
+--localmem=100
+
+
+```
+
+This will produce a folder at the output directory that contains a bunch of results, diagnostics, and logs from Cellranger. The most important files are found on the "outs" subfolder.
+
+The relevant files to take from Cellranger are called "filtered_feature_bc_matrix.h5", or the files in the folder "filtered_feature_bc_matrix". These are equivalent.
+
+
+# Inputs: pre-processed data from Cellranger
+
+
+As stated above, the key input is the file "filtered_feature_bc_matrix.h5" in the "outs" folder from Cellranger.
+
+The input is called a "gene expression matrix" or a "count matrix". The rows are genes, the columns are cells (denoted by their barcodes). The values are the number of UMIs (Unique Molecular Identifies, ie individual transcripts) detected for each gene/cell.
+
+The matrix may be quite large: usually around 20,000-30,000 or more rows (genes, lncRNAs, etc), and around 10,000 columns (cells).
+
+The data we will work with in this vignette is from peripheral blood mononuclear cells (ie, immune White Blood Cells). More information is available at this link:
+https://www.10xgenomics.com/datasets/10k-human-pbmcs-3-v3-1-chromium-x-with-intronic-reads-3-1-high
+
+This dataset is a small sample dataset of about 500 cells.
+
+
+We will read the gene expression matrix in from the "filtered_feature_bc_matrix.h5" file in below:
+
+```{r readin-data}
+
+
+datapath = 'data/500_PBMC_3p_LT_Chromium_X_filtered_feature_bc_matrix.h5'
+
+mat <- Read10X_h5(datapath)
+
+```
+
+
+We have read in the gene expression matrix as an R object, which we have called "mat". Let's check the numbers of rows, columns, and peek at the matrix.
+
+``` {r check-mat}
+
+message('Dimensions of matrix (number of rows and columns):')
+dim(mat)
+
+
+message('\n\n\n\nFirst few columns and rows of matrix:')
+mat[1:3,1:3]
+
+```
+
+The first two numbers indicate the numbers of rows and columns of the full matrix, respectively.
+
+Below that, we printed out the first 3 columns and rows of the matrix. The row names are gene names, while the column names are cell barcodes. The matrix is in a special, memory-compressed format called a "Sparse Matrix". In this format, zeros are represented as small dots rather than numbers. This memory compression serves to aid the analysis of huge datasets.
+
+
+# Filter lowly expressed genes and empty cells
+
+Sometimes, the identified genes can have extremely low expression values or even be fully empty. Keeping such rows in the matrix can reduce memory efficiency and potentially drive inaccurate results. We will filter these out.
+
+
+First, let's check how many genes are completely empty, with no transcripts detected from any cell:
+
+
+```{r check-all-zeros}
+
+message('True = genes with all zeros across all cells')
+table(rowSums(mat) == 0)
+
+
+```
+
+We can see that many genes are not detected at all in any cell.
+
+At a minimum, we can select a threshold of 3 transcripts per gene across cells. Let's check how many genes pass this threshold:
+
+```{r check-min-thres}
+
+message('True = genes with at least three transcripts detected from any cell(s)')
+table(rowSums(mat) >= 3)
+
+
+```
+
+We can see that a fairly large number of genes survive this threshold. The number of genes detected in this manner may vary quite a bit from dataset to dataset and depends on the types and diversity of cell types in the sample.
+
+
+Below, we select only the matrix rows with greater than or equal to 3 total counts for downstream analysis.
+
+```{r filter-min-thres}
+
+mat <- mat[rowSums(mat) >= 3,]
+
+
+```
+
+
+
+
+# Input matrix to Seurat object for downstream clustering analysis
+
+
+Now that we have the matrix, we will perform some analysis. In scRNA-seq analysis, we typically begin with trying to classify similar cells together by cell type, such as T cells, B cells, etc. To do this, we first have to cluster the cells together based on shared transcriptomic profiles.
+
+
+For this, we will use the popular software package Seurat:
+https://satijalab.org/seurat/
+
+
+First, we will use the gene expression matrix as an input to Seurat. Seurat has its own data format, which includes the gene expression matrix, but also a convenient way to store transformed data and per-cell metadata information. This will be important in a moment, as we will see.
+
+
+
+```{r mat-to-seurat}
+
+#using mat, create seurat object ("sobj")
+sobj <- CreateSeuratObject(counts = mat)
+
+#printing the seurat object shows some basic information:
+sobj
+
+```
+
+
+
+Terminology time: in machine learning, the term "features" is often used. This is equivalent to the term "variables", which in our case is the genes. The cells are considered "samples". However, the samples should not considered independently-drawn since they all come from the same source sample. That is why increasing numbers of replicates, along with replicate-aware methods such as "pseudobulk" analysis have become increasingly popular. Although, that is beyond the scope of an introductory tutorial.
+
+
+
+
+Let's explore the Seurat object:
+
+Seurat stores the same gene expression matrix as a "layer" (or "slot") of an "assay". The terminology here becomes more important when complex data transformations are used. But it is quite easy to access via the `GetAssayData` function. Below is some code to recover the matrix from the Seurat object. We check the dimensions and confirm they are the same as the raw count matrix:
+
+
+```{r check-assay}
+
+dim( GetAssayData(sobj, assay = 'RNA', layer = 'counts') )
+
+```
+
+
+The other important information Seurat stores is per-cell metadata. These are stored as a data.frame R object. We can check this below:
+
+```{r check-metadata}
+
+head(sobj@meta.data, n = 3)
+
+```
+
+Seurat automatically calculates some quality control information such as "nCount_RNA" (number of UMIs, ie transcripts, per cell); and "nFeature_RNA" (number of unique genes detected per cell). More on this below.
+
+
+
+
+
+```{r check-metadata-dim}
+
+dim(sobj@meta.data)
+dim(mat)
+
+```
+
+
+
+Here, we also check the dimensions of the metadata. We can see the number of rows is equal to the number of columns in the matrix. This is how the per-cell meta-data information is stored.
+
+
+
+
+
+# Quality control and filtering
+
+
+Now that we are a bit more familiar with Seurat objects, we can use the functions in the Seurat package to proceed with the analysis.
+
+
+A common step in scRNA-seq data analysis is to filter poor quality or damaged cells out.
+
+
+## Mitochondrial filtering
+
+One metric often used to filter such cells is the percent of mitochondrial gene expression. The reasoning is that damaged cells leak out their cytoplasmic mRNA, but may retain larger structures like mitochondria, which keep the mt-RNAs inside the droplet. However, these cells can have an extreme and biased distribution, so they are typically removed.
+
+
+```{r pctmito-calc}
+
+#get genes with names starting with "MT", case insensitive
+mito.features <- grep(pattern = "^mt-", x = rownames(x = sobj), value = TRUE, ignore.case = T)
+
+#calculate percent mito and add to seurat metadata
+sobj[["percent.mito"]] <- Seurat::PercentageFeatureSet(sobj, features = mito.features)
+
+
+#plot
+VlnPlot(sobj, features = 'percent.mito')
+
+
+```
+
+This is a violin plot, commonly used in scRNAseq analysis. It is similar to a boxplot. The points are cells, the y-axis is the variable being examined (here, the percent of all gene expression coming from mitochondrial genes per cell), and the "violin" is a density distribution for the variable. (The X axis is not meaningful here and is only used to help visualize the distribution). 
+
+
+Let's select a reasonable threshold based on the distribution:
+
+```{r mito-cutoff-select-thres}
+
+thres <- 15
+
+
+#plot
+VlnPlot(sobj, features = 'percent.mito') +
+  geom_hline(yintercept = thres, linetype = 'dotted')
+
+
+```
+
+
+
+Based on the threshold, we can now remove cells with mito content above the limit.
+
+
+```{r filter-mito-subset}
+
+#get metadata
+md <- sobj@meta.data
+
+#select metadata rows (cells) with percent mito below threshold defined above
+md <- md[md$percent.mito < thres,]
+
+#subset based on cell names, ie metadata row names
+sobj <- sobj[,rownames(md)]
+
+
+#check dimensions of object
+sobj
+
+
+```
+
+
+Thus, we have removed some poor-quality cells. This is a widely used quality control approach.
+
+
+Note that such filters are data distribution driven, and may vary widely from dataset to dataset, based on celltypes, protocol execution, etc. It is not uncommon in a full dataset (10K cells) for hundreds or thousands of cells to be removed on such quality control basis.
+
+
+
+
+## number of transcripts and number of unique genes filtering
+
+
+Other widely used approached filter cells based on minimum number of UMIs and minimum number of unique genes. The method is very similar, except we usually just remove cells with abnormally low number of UMIs and unique genes.
+
+
+Below, the variable "nCount_RNA" refers to number of UMIs per cell (ie, the total number of transcripts captured), while the variable "nFeature_RNA" refers to number of unique genes detected per cell.
+
+
+
+```{r vln-nGENE}
+
+VlnPlot(sobj, c('nCount_RNA','nFeature_RNA'))
+
+
+```
+
+
+
+As in the mitochondrial distribution, these numbers can vary quite a lot from dataset to dataset.
+
+In contrast to the mitochondrial filtering, here we typically care most about removing the cells that are "below" the normal distribution (ie, those with abnormally low transcripts / genes).
+
+Visualization of such quality control metrics is a must for this type of analysis.
+
+
+We will apply some thresholds and filter below:
+
+
+```{r filter-umi-gene-subset}
+
+#define thresholds
+nCount_RNA_threshold <- 5000
+nFeature_RNA_threshold <- 1500
+
+#get metadata
+md <- sobj@meta.data
+
+
+#select metadata rows (cells) based on minimum thresholds
+md <- md[md$nCount_RNA > nCount_RNA_threshold,]
+md <- md[md$nCount_RNA > nFeature_RNA_threshold,]
+
+#subset based on cell names, ie metadata row names
+sobj <- sobj[,rownames(md)]
+
+
+#check dimensions of object
+sobj
+
+
+```
+
+
+
+
+
+We have now visualized some important quality control metrics, and filtered out poor quality cells. To summarize, cells with high mitochondrial content, or low UMIs / unique genes, can lead to biased or confusing downstream results, so we remove these from the dataset.
+
+
+Note that such filters are data distribution driven, and may vary widely from dataset to dataset, based on celltypes, protocol execution, etc. It is not uncommon in a full dataset (~10K cells) for hundreds or thousands of cells to be removed on such quality control basis.
+
+
+
+
+
+
+
+# Normalization and gene prioritization for clustering analysis
+
+
+
+Now that we are a bit more familiar with Seurat objects, we can use the functions in the Seurat package to proceed with the analysis.
+
+
+First, we perform a normalization procedure. 
+
+To understand why we do this, let's check the distribution of our genes:
+
+
+```{r check-dist}
+
+
+hist(rowMeans(mat))
+
+
+```
+
+
+
+As we can see, many genes are expressed at very low levels, while some genes are expressed at very high levels.
+
+
+Below, we apply a log transformation via the `log1p` function. This function adds 1 to each value (a "pseudocount", since we cannot take the log of zero). Then it takes the natural log. Let's visualize below:
+
+
+
+
+```{r check-dist-log1p}
+
+
+hist(log1p(rowMeans(mat)))
+
+
+```
+
+
+
+
+The result of this is that the distribution of gene expression becomes less variable. This is useful for visualization and modelling.
+
+
+Seurat uses something similar to the log1p function, but with a bit of extra steps under the hood, that many people use in scRNAseq. Let's apply the default Seurat normalization and check the distribution:
+
+
+```{r seurat-normalize}
+
+sobj <- NormalizeData(sobj)
+
+```
+
+We normalized the data, and below we will check the distribution:
+
+```{r check-dist-seuratnorm}
+
+#access the transformed data in RNA assay, data layer.
+# the raw data is in layer = 'counts'; normalize data is in layer = 'data'.
+# assay = 'RNA' is typically used for everything.
+# multiple assays can be set for multi-omic experiments, or for combining alternatively transformed matrices into one seurat object.
+mat <- GetAssayData(sobj, assay = 'RNA', layer = 'data')
+
+
+hist(rowMeans(mat))
+
+
+```
+
+
+
+As you can see, it is very similar (but not identical to) the simple log1p transformation.
+
+To read more details, you can always find out more about a function by putting a question mark in front, and running in the console, as below:
+
+
+```{r helpdocs-normalizedata}
+
+
+?Seurat::NormalizeData
+
+
+```
+
+
+
+
+So normalization generally brings the extreme high counts to a scale that is more in line with the rest of the data. But why do we actually perform normalization?
+
+
+
+The problem with non-normalized data is that super highly expressed genes may have more variance just because they are highly expressed. However, these may not always be the most interesting or important genes. We want genes that are not uniformly expressed in all cells, but in fact have different distributions in different groups of cells, such as marker genes. To adjust the variances and pick such genes, we we apply normalization. See below:
+
+
+
+``` {r vst-plots}
+
+#get non-normalized data
+mat <- GetAssayData(sobj, assay = 'RNA', layer = 'counts')
+
+#calculate gene means and variances 
+rm <- rowMeans(mat)
+rv <- matrixStats::rowVars(as.matrix(mat))
+
+gdf <- data.frame(geneMeans = rm,
+                  geneVariances = rv)
+
+gg1 <- ggplot(gdf, aes(geneMeans, geneVariances))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle('Raw counts, non-normalized')
+
+
+
+
+#get Seurat normalized data
+mat <- GetAssayData(sobj, assay = 'RNA', layer = 'data')
+
+#calculate gene means and variances 
+rm <- rowMeans(mat)
+rv <- matrixStats::rowVars(as.matrix(mat))
+
+gdf <- data.frame(geneMeans = rm,
+                  geneVariances = rv)
+
+gg2 <- ggplot(gdf, aes(geneMeans, geneVariances))+
+  geom_point()+
+  geom_smooth()+
+  ggtitle('Normalized counts')
+
+
+
+gg1 + gg2
+
+
+
+```
+
+
+
+On the left, without any normalization, the variance is correlated with expression magnitude, and the highest variance genes also have the highest expression levels.
+
+On the right, with normalization, the variance is no longer driven by just how highly expressed the gene is. The gene expression magnitudes are more balanced, allowing prioritization of genes that actually have distinct expression patterns across cells.
+
+This type of normalization is called a "variance-stabilizing transformation". 
+
+To summarize, the reason we perform normalization is to remove the mean-variance relationship. We want to select interesting, Highly Variable Genes not just because they are highly expressed, but because they are diverse across cells.
+
+
+
+
+# Selection of highly variable genes (HVGs)
+
+
+As input to the clustering, we perform a step called "feature selection". This involves prioritizing genes based on their variance. Highly variable genes (or HVGs) can include genes that are highly expressed in one group of cells, and not at all in another group of cells. A gene like that would be, by definition, a marker gene, and would be quite interesting to study or report.
+
+In clustering analysis and in machine learning generally, feature selection helps ensure we are only working with genes that have some capability to distinguish between cells. Including uniformly expressed genes in such analysis may or may not impact the downstream accuracy, but it certainly is computationally wasteful.
+
+
+Let's use Seurat to calculate the top variable genes. The number of HVGs we want can be varied, which may affect the downstream analysis, although studies have found that downstream analysis is fairly robust this choice (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6582955/).
+
+
+
+
+```{r select-HVGs}
+
+
+#default is 2000, but it can be varied if we want
+sobj <- FindVariableFeatures(sobj, nfeatures = 2000)
+
+```
+
+
+
+We can inspect these HVGs also:
+
+```{r inspect-hvgs-plot}
+
+Seurat::VariableFeaturePlot(sobj)
+
+
+```
+
+
+```{r inspect-hvgs-print}
+
+#return top 20 HVGs
+head(VariableFeatures(sobj), 20)
+
+
+```
+
+
+Here we plot and print some of the top variable features. Oftentimes, this will include important cell type marker genes.
+
+
+
+
+The HVGs (2000 by default) will be used for downstream analysis.
+
+
+
+
+
+# Principal Component Analysis (PCA)
+
+
+Many genes are strongly correlated (co-expressed). We know that many genes may be regulated in similar ways, ie at the pathway level. While one gene may be noisy, a co-expressed group of genes is usually less affected by noise.
+
+PCA allows us to accomplish two things are once: study tightly correlated groups of genes, and take advantage of the noise reduction that arises from co-expressed gene redundances for downstream analysis.
+
+
+First, we perform a scaling and centering transformation (ie, transform normalized gene expression counts to Z-scores). Note that this turns data from log-scale, all positive counts, to Z scores, which by definition can be positive or negative, and are often between the interval from -3 to 3. This is done to standardize the expression magnitudes and to emphasize the relative differences of gene expression across cells for input to PCA.
+
+This is easy in Seurat:
+
+
+```{r scale-hvgs}
+
+sobj <- ScaleData(sobj)
+
+
+```
+
+
+Now, we run PCA using Seurat. This is a complex algorithm and the details are beyond the scope of this vignette. However, let's think about the inputs and outputs. 
+
+The input of PCA is the scaled gene rows. The output of PCA are the so-called Prinicpal Components (PCs). These have two imporant pieces of information, which we will dive into after computing PCA. We can decide how many PCs to compute, usually 50 or less is sufficient.
+
+
+
+
+
+
+
+```{r run-pca}
+
+
+sobj <- RunPCA(sobj, npcs = 30)
+
+
+```
+
+
+PCs are complex variables with two key components: PC embeddings, and PC feature loadings.
+
+
+The most important part of the PCs for the purpose of clustering scRNA-seq data are referred to as PCA "embeddings". Let's visualize them below:
+
+``` {r pca-embeddings}
+
+sobj@reductions$pca@cell.embeddings[1:5,1:5]
+
+
+```
+These are scores for each cell for each PC (note the row names are cell barcodes).
+
+
+Lets visualize the PCA embeddings for PC1 and PC2:
+
+
+```{r pca-embeddings-plot}
+
+DimPlot(sobj) + ggtitle('PCA plot')
+
+```
+
+
+
+In this plot, each cell is a point, and the points are grouped according to their transcriptomic patterns, as identified by the first two PCs, PC1 and PC2. Plotting the first two PCs are usually what are referred to as "PCA plots".
+
+It may already be apparent that groups of cells are separating quite clearly in PCA. The clustering analysis that we will run in a few moments is a machine-learning method to make the best possible, data-driven choice to classify each cell to a cluster.
+
+
+
+The other important part of each PC is referred to as the PC "feature loadings":
+
+```{r pca-loadings}
+
+sobj@reductions$pca@feature.loadings[1:5,1:5]
+
+```
+
+These are scores for each gene for each PC (note the row names are gene names).
+
+
+We can also visualize the genes most important to the first two PCs (as weighted by the feature loadings):
+
+```{r pca-loadings-plot}
+
+Seurat::PCHeatmap(sobj, dims = c(1:2))
+```
+
+In these heatmaps, yellow is highly expressed, black is close to the mean, and purple is lowly expressed (below the mean). The columns are genes. Essentially, this allows us to see groups of correlated genes that are also highly variable across cells in the dataset. The separation between cells along the PC1 and PC2 axis is driven by these genes.
+
+
+
+
+A very important way to visualize PCA is via the "Elbow Plot":
+
+
+```{r pca-elbowplot}
+
+ElbowPlot(sobj, ndims = 30)
+
+```
+
+
+The order (and labels) of each PC is not arbitrary. Each PC captures a decreasing amount of variation in between cells in the dataset. In the elbow plot, the X axis is each PC, and the Y axis is the amount of variance in the dataset explained by each PC.
+
+
+One important hyperparameter that can vary quite a bit across datasets is the selection of how many PCs we want to include in the downstream analysis, including clustering. The idea is to pick the minimum number of PCs that explains a large amount of variance, but not to pick too many, since sometimes gene variance can be driven by noise.
+
+There is no perfect or universally agreed-upon number or method for selecting the number of PCs, but usually, it is done by choosing the "elbow" point on the elbow plot above. This is the inflection point at which variance "flatlines", and above this point, the added variance is minimal.
+
+
+## Interactive time: pick a value for how many PCs
+
+Using the elbow plot above, pick a value you believe represents the Elbow point, by replacing the 30 with a different number after the equal sign in the code block below:
+
+```{r choose-elbow}
+
+#replace the 30 with a number to use. It must be 2 or higher, or less than 30.
+npc_elbowpoint = 30
+
+```
+
+
+Keep in mind, there may be many clearly wrong answers, but not necessarily a single right answer.
+
+
+Below we will plot an elbow plot with our choice selected. We can always change it later.
+
+```{r pca-elbowplot-vline}
+
+
+#the code below will plot a elbow plot with the number you chose.
+ElbowPlot(sobj, ndims = 30) + geom_vline(xintercept = npc_elbowpoint, linetype = 'dotted')
+
+
+
+```
+
+
+
+
+This is a key parameter which can affect the downstream clustering and results. As such, it is very important to keep track of which number is selected, and to report it in the methods when publishing.
+
+
+
+# Graph, Cluster, and Visualization
+
+
+
+Once we have completed PCA, we can move on to the strange world of high-dimensional clouds, sparsity, and non-linearity.
+
+Imagine the universe: there are vast pockets of nearly empty space, but there are also regions of immense density of matter, such as gas clouds and galaxies. This is quite similar to the topology of high-dimensional single-cell data. However, rather than existing in a 3D space like us, when we examine the molecular profiles of cells, we are forced to think in extremely high dimensional space. The dimensionality of a dataset is defined by the number of variables: number of genes, reduced to number of HVGs, reduced to number of PCs. This is why PCA is also referred to as "dimension reduction".
+
+Additionally, cellular space can often by highly non-linear. The best way to imagine this is via the "swiss roll" example. It is not easy to insert an image here, so please navigate to google images and just search "swiss roll data" and you will see clearly. Essentially, the cells that are close together in high dimensional space may not necessarily be related.
+
+
+So to summarize: molecular profiles of cells are defined by high dimensionality and non-linearity. To deal with this complex type of data, we can rely on arguably the most flexible and important tool in all of single-cell analysis: the K-nearest neighbor (KNN) graph.
+
+KNN graphs work by iterating through each cell, finding the closes cells in high-dimensional PCA space. They are agnostic to the actual distances between cells. 
+
+
+A key input parameter is the number of PCs as we selected above. This determines the dimensionality of the space within which to compute the graph.
+Another parameter called "k" is the number of nearest neighbors to detect for each cell. It is often kept at the default of 20 in Seurat, but it can be another important choice.
+
+
+
+
+```{r compute-graph}
+
+#make sure you have set the npc_elbowpoint variable above.
+
+
+sobj <- FindNeighbors(sobj, dims = 1:npc_elbowpoint)
+
+```
+
+
+
+One way we can visualize the KNN graph is by using a graph-based, non-linear dimension reduction method, such as t-SNE or UMAP. These are similar to PCA, but they are able to better account for non-linearity in the data.
+
+(Note that because of the way the software is written, the function below actually computes its own graph under the hood.)
+
+
+
+```{r compute-tsne-umap}
+
+#make sure you have set the npc_elbowpoint variable above.
+
+sobj <- RunTSNE(sobj, dims = 1:npc_elbowpoint)
+sobj <- RunUMAP(sobj, dims = 1:npc_elbowpoint)
+
+
+
+```
+
+
+
+
+Let's visualize these plots now:
+
+
+```{r plot-tsne-umap}
+
+
+tsne <- DimPlot(sobj, reduction = 'tsne') + NoLegend()
+umap <- DimPlot(sobj, reduction = 'umap') + NoLegend() #if both are calculated, and reduction is not set, it will default to umap
+
+
+
+tsne + umap
+
+```
+
+
+In general, UMAP graphs are built to emphasize "global" connectivity between cell groups, while tSNE emphasize local connectivity between individual cells. For example, T and B cells (both of which are lymphocytes) may be closer together in a UMAP than a tSNE plot.
+
+
+In contrast to PCA, these methods are built to account for high dimensionality and non-linearity, so they are often able to illustrate separation between cells more cleanly. However, note that these same factors limit the interpretability of the axes. The empty space between groups of cells is not simply proportional to how similar or not the groups are.
+
+
+Finally, using the KNN graph we computed, we can perform the clustering procedure to group cells together. We use a method called "Louvain clustering", which works well with high dimensional, non-linear data. It clusters cells based on density of the graph.
+
+One important parameter in Louvain clustering is referred to as "resolution". This controls the number of clusters detected. We will explore this in a moment.
+
+
+```{r compute-clusters}
+
+sobj <- FindClusters(sobj, resolution = 0.5)
+
+
+```
+
+
+This adds the clustering information for each cell to the seurat metadata:
+
+```{r check-metadata-clusters}
+
+head(sobj@meta.data, 5)
+
+
+```
+
+Two variables will be created: one starting with "RNA_snn_res.NUMBER", which stores the clusters with resolution in the varaible name, and an identical variable just called "seurat_clusters". If you re-run clustering with a different resolution, it will overwrite seurat_clusters, but create a new column with the resolution value you choose.
+
+
+Once clustering is done, we can now plot the clusters on the UMAP:
+
+```{r plot-tsne-umap-clusters}
+
+
+
+DimPlot(sobj, reduction = 'umap', group.by = 'RNA_snn_res.0.5', label = T)
+
+
+```
+
+
+
+
+The resolution parameter, like the PC parameter, can have a strong affect on the clustering results, and as such must also be reported.
+
+
+Note that the clusters are sorted by number of cells. The first cluster (cluster 0) is the biggest cluster with the most cells. However, this is a useful trick that Seurat automatically does for us, rather than a built-in feature of the Louvain clustering algorithm.
+
+
+
+# Hyperparameter selection: 1) number of PCs and 2) Louvain resolution.
+
+
+Let's quickly review what we have learnt so far about PC selection and clustering. These are referred to as "hyperparameters", because there is no universally agreed upon way to select these values, and they may vary from dataset to dataset.
+
+
+We will vary the number of PCs while keeping cluster resolution the same, and see the effect below:
+
+
+```{r paramsweep_PCs}
+
+#for each PC of values 2 through 10, we'll run graph, UMAP, and clustering:
+# we start with 2 since at least 2 PCs are needed.
+sweep_npcs_input <- 2:10
+
+#create a backup seurat object
+sobjx <- sobj
+
+
+#for each PC value, rerun analysis and make a UMAP, which we save to a list object
+out_umaps_list_pcs <- lapply(sweep_npcs_input, function(npc_sweep){
+  
+  message(npc_sweep)
+  
+  #in three lines, graph, umap, and cluster with each PC value, keeping louvain res the same:
+  suppressMessages( sobjx <- FindNeighbors(sobjx, dims = 1:npc_sweep,verbose=F) )
+  suppressMessages( sobjx <- RunUMAP(sobjx, dims = 1:npc_sweep, verbose=F) )
+  suppressMessages( sobjx <- FindClusters(sobjx, resolution = 0.5, verbose=F) )
+  
+  suppressMessages( DimPlot(sobjx, reduction = 'umap', group.by = 'seurat_clusters') + 
+                      ggtitle(paste0("PCs 1:", npc_sweep))  
+  )
+  
+  
+})
+
+
+```
+
+
+
+Let's plot the results below.
+
+```{r paramsweep_PCs-visualize, fig.height=6, fig.width=8}
+
+patchwork::wrap_plots(out_umaps_list_pcs, ncol = 3)
+
+#if hard to see, remove hash tag "#" on line below.
+# out_umaps_list_pcs
+
+```
+
+If plots are not visible, try increasing the fig.height and fig.width values, or removing the hashtag ("#") in front of the line that has the hash tag in the code block abode 
+
+
+As we can (hopefully) see, increasing numbers of PCs usually results in increased separation between cells and clusters. It also has a more subtle affect on the number of clusters detected. This is because increasing the number of PCs allows use of more information during graphing and clustering. However, too many PCs can result in introduction of noise, so best to rely on the elbow plots as explained above.
+
+
+
+Let's repeat the analysis, this time varying only the Louvain resolution, while keeping PCs the same as what you selected above ("npc_elbowpoint" variable).
+
+
+```{r paramsweep_res}
+
+
+#we'll select some resolution values, then loop thru each with clustering.
+sweep_res_input <- seq(0.1, 3, by = 0.3)
+
+#create a backup seurat object
+sobjx <- sobj
+
+out_umaps_list_res <- lapply(sweep_res_input, function(res_sweep){
+  
+  message(res_sweep)
+  
+  #in three lines, graph, umap, and cluster with each PC value, keeping louvain res the same:
+  suppressMessages( sobjx <- FindNeighbors(sobjx, dims = 1:npc_elbowpoint,verbose=F) )
+  suppressMessages( sobjx <- RunUMAP(sobjx, dims = 1:npc_elbowpoint, verbose=F) )
+  suppressMessages( sobjx <- FindClusters(sobjx, resolution = res_sweep, verbose=F) )
+  
+  suppressMessages( DimPlot(sobjx, reduction = 'umap', group.by = 'seurat_clusters') + 
+                      ggtitle(paste0("Louvain res: ", res_sweep))  
+  )
+  
+  
+})
+
+
+```
+
+
+Let's plot the results below.
+
+```{r paramsweep_res-visualize, fig.height=10, fig.width=8}
+
+patchwork::wrap_plots(out_umaps_list_res, ncol = 3)
+
+
+# if plots are not visible, remove the hash tag on the below line below, then you can click through the plots
+# out_umaps_list_res
+
+```
+
+
+
+
+If we keep the number of PCs the same but vary the Louvain resolution, we notice that the UMAP will look exactly identical. This is because it is based on a graph that depends only on the number of PCs. However, the number of clusters changes dramatically. 
+
+
+To summarize:
+
+Low PCs = less information input to graph / clusters; high PCs = more information (but also potentially more noise).
+
+Low louvain resolution = less clusters, high resolution = more clusters.
+
+How do we pick the best values of these? This is a challenging question.
+
+For PCs, the elbow point is often accepted as the most reasonable selection. Inspection of feature loadings via `Seurat::PCHeatmap()` plots is another method sometimes used.
+
+For Louvain clusteringresolution, the answer is more difficult and sometimes can be specific to the dataset or the goal of the analysis. Oftentimes, starting with a low resolution to identify big clusters, and then checking a high resolution to study smaller clusters can be helpful. Another way is to use low resolution, and then for each big cluster, specifically select those cells and re-run the whole pipeline (HVG selection, PCA, and clustering), in order to identify "sub-clusters".
+
+With data-driven techniques alone, such choices are difficult. Making such choices on the basis of biological interpretability is a safer bet, and one way we can do that is via marker analysis.
+
+
+
+
+# Marker analysis
+
+Now that we have identified clusters, we can identify genes that are specific to each cluster, which we call "marker genes".
+
+
+This analysis uses methods of differential expression analysis between clusters to find genes overexpressed in each of them. This is implemented in the Seurat `FindAllMarkers` function.
+
+By default, these functions use a non-parametric two-sample test, the Wilcoxon rank-sum test. This test is also called the Mann Whitney U test, among other names. It is a non-parametric version of the two sample t-test, to compare the distribution of a variable between two groups.
+
+For cluster 1, we take the cells in that cluster, and compare the gene expression levels relative to cells from all other clusters. So the groups are Cluster 1 vs all cells, Cluster 2 vs all cells, etc. We do this for each gene.
+
+The Seurat `FindMarkers` function can be used to specifically compare clusters rather than "cluster 1 vs all", if required.
+
+
+
+
+Let's do some marker analysis:
+
+
+```{r findallmarkers}
+
+#this selects only positive markers which is not the default.
+m <- FindAllMarkers(sobj, only.pos = T)
+
+```
+
+Note that we select only positive markers, rather than "negative markers", which would be genes expressed in all clusters expect cluster 1, etc.
+
+Let's inspect the output:
+
+```{r markers-head}
+
+
+head(m)
+
+```
+
+Each gene is a row, and the rows have some information about the gene xpression. The column called "cluster" denotes that this gene was overexpressed in a particular cluster.
+
+"p_val" is the Wilcoxon test P value result. 
+"avg_log2FC" is a measure of effect size comparing expression levels of this gene in cells of the indicated cluster relative to cells not in this cluster (all other cells).
+"pct.1" is another effect size metric, indicating the percent of genes in the cluster that express at least one count of this gene.
+"pct.2" is another effect size metric, indicating the percent of genes outside of this cluster that express at least one count of this gene.
+"p_val_adj" is the p_val after multiple test correction for many genes via the Bonferroni correction.
+"cluster" indicates the cluster each row (each gene) is overexpressed in.
+"gene" is the gene name. Note that this is also in the rownames, but using the "gene" column is more reliable, because if a gene is found to be a marker of more than one cluster, the row-names will be incorrect.
+
+
+
+We can count how many marker genes were identified for each cluster:
+
+```{r markers-table}
+
+
+table(m$cluster)
+
+```
+
+
+It is not uncommon to see hundreds or thousands of genes for each cluster. Note that this can be one metric used during selection of the hyperparameters above (especially Louvain Resolution). If a cluster has no specific marker genes, chances are it be have been classified based off some type of noise, and a lower resolution is required.
+
+
+
+Additionally, many of the genes may be considered to be overexpressed, but might be fairly non-specific. By default, the genes are sorted within each cluster, by the avg_log2FC.
+
+In the Deyou Zheng lab, we apply a special scoring metric, which emphasizes specificity and sensitivity of the markers, rather than expression magnitude alone. In our hands, this usually results in more specific marker genes, rather than genes which are simply over-expressed to some extent. We provide the score in the code block below:
+
+
+
+```{r markers-addscore}
+
+#note that all l2FC must be positive for this to work.
+m$score <- (m$pct.1 - m$pct.2) * m$avg_log2FC
+
+```
+
+
+
+
+
+## Visualizing gene expression
+
+
+
+First, let's remember what our clusters look like by checking the UMAP:
+
+```{r markers-plot-dimplot}
+
+DimPlot(sobj, label = T)
+
+```
+
+
+One way to visualize expression is to plot it right on the UMAP. Let's plot the top marker of each cluster on the UMAP:
+
+
+```{r markers-plot-featureplot}
+
+ngene <- 1
+
+top <- m %>% group_by(cluster) %>% top_n(n = ngene, wt = score)
+
+
+FeaturePlot(sobj, features = top$gene)
+
+```
+
+
+
+This can be a powerful way to show a small number of genes in the context of cluster separation. But it does take up a lot of space.
+
+
+Another commonly used way to visualize a small number of genes is called a Violin Plot. Let's make these for the top markers:
+
+
+
+```{r markers-plot-vlnplot}
+
+ngene <- 1
+
+top <- m %>% group_by(cluster) %>% top_n(n = ngene, wt = score)
+
+
+VlnPlot(sobj, features = top$gene)
+
+```
+
+
+Just like in the quality control violin plots, each point is a cell, and the violin represents the cell distribution. This gives us a sense of both the expression magnitude and the number of cells that express the gene. However, note that there may be hundreds or thousands of cells that do not show any expression. These are the thick black lines above the numbers in some of the plots above.
+
+
+
+
+
+Now, we will produce some plots showing the top genes for each cluster. Let's select the top 5 genes per cluster, weight it by the default (avg_log2FC), and plot them as a heatmap.
+
+
+
+```{r markers-plot-heatmap-l2fc}
+
+ngene <- 5
+
+top <- m %>% group_by(cluster) %>% top_n(n = ngene, wt = avg_log2FC)
+
+
+genes <- top$gene
+#we must scale these genes for heatmap
+sobj <- ScaleData(sobj, features = genes)
+
+DoHeatmap(sobj, genes) + ggtitle('Heatmap of top markers by avg_log2FC')
+
+```
+
+
+Let's compare this with a heatmap of genes, where we select the top 5 genes by the score we calculated:
+
+
+```{r markers-plot-heatmap-score}
+
+ngene <- 5
+
+top <- m %>% group_by(cluster) %>% top_n(n = ngene, wt = score)
+
+genes <- top$gene
+
+
+sobj <- ScaleData(sobj, features = genes)
+
+DoHeatmap(sobj, genes)+ ggtitle('Heatmap of top markers by (pct1-pct2)*avgl2FC score')
+
+```
+
+
+
+
+Marker heatmaps can be a useful way to show how genes are specific to or shared across clusters. Sometimes, plotting the top markers can reveal that some clusters are actually composed of similar cell types.
+
+
+
+
+
+
+Similar to a heatmap, we can also show a Seurat Dot Plot. Here, the cells in each cluster are averaged, and the size of the dots is proportional to the percent of cells expressing each gene.
+
+
+
+```{r markers-plot-dotplot-score}
+
+
+#if you like, you can modify the number of genes and font sizes
+ngene <- 5
+gene_font_size <- 7
+
+
+
+
+top <- m %>% group_by(cluster) %>% top_n(n = ngene, wt = score)
+
+genes <- top$gene
+
+DotPlot(sobj, features = unique(rev(genes))) +
+  coord_flip()+
+  theme(axis.text.y = element_text(size = gene_font_size))
+
+```
+
+
+
+
+We can always customize the input genes for any of these plots. Below, we will can pick any gene we want to plot.
+
+
+```{r plot-myfave-genes}
+
+#lets use a character vector to pass some genes as input to the plotting function.
+# each gene name is in quotes, separated by commas. double quote or single quote both work.
+# and wrapped in a c() block, indicating it is a vector object.
+
+
+genes <- c('SKP2', 'PTPRC')
+
+FeaturePlot(sobj, features = genes)
+
+```
+
+
+
+
+If you want to search any particular genes, here are some tips to remember:
+
+- Try to make sure you are using the proper gene symbol. You can look it up on GeneCard for human, MGI for mouse; each species has a database of proper symbols.
+
+- Make sure you are capitalizing all letters for human, just first letter for mouse. (For most genes)
+
+- If your favorite gene is missing, make sure it is in the dataset. One way is like below:
+
+
+```{r check-myfave-genes}
+
+
+#lets use a character vector to pass some genes as input.
+# each gene name is in quotes, separated by commas, 
+# and wrapped in a c() block, indicating it is a vector object.
+
+my_fave_genes <- c("SKP2", "Skp2", "FakeGeneLOL", "TP53")
+
+
+my_fave_genes %in% rownames(sobj)
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+# Cell annotation
+
+
+Once we have clustered the data, we can start trying to identify which cell types are present in our data. Usually, the strongest signal that is captured by clustering and marker analysis comes from cell types.
+
+
+One way to annotate cell clusters to cell types is to carefully inspect the marker lists and marker plots above. Googling each gene from the heatmaps or dotplots may reveal some pattern of expression specific to a certain celltype.
+
+
+On the other hand, if we know what cell types to expect, we can try to read up on literature and pick some genes. Let's plot some canonical immune genes below:
+
+
+
+```{r markers-plot-dotplot-canonical}
+
+
+#lets use a character vector to pass some genes as input to the plotting function.
+# each gene name is in quotes, separated by commas, 
+# and wrapped in a c() block, indicating it is a vector object.
+
+genes <- c('PTPRC', 'CD3E' , 'CD4', 'CD8A', 'CD19', 'CD68')
+
+
+DotPlot(sobj, features = unique(rev(genes))) +
+  coord_flip()+
+  theme(axis.text.y = element_text(size = gene_font_size))
+
+```
+
+
+
+Immune afficionados may start to notice some patterns of cell type specifity to each cluster.
+
+
+
+
+
+
+
+There are also some tools to try to automatically annotate cell types based on existing published data. These include SingleR and Azimuth.
+
+
+
+
+We will rely on a different strategy here which is driven by the markers from our clusters and a database of cell type markers. This is the MISGDB Cell Signatures database:
+
+https://www.gsea-msigdb.org/gsea/msigdb/human/genesets.jsp?collection=C8
+
+
+We will examine all the marker genes and run an enrichment analysis to see which celltypes they map to. We'll do this using a tool called ClusterProfiler, a flexible enrichment analysis tool. 
+
+Below is some code to quickly accomplish this task:
+
+
+```{r msigdb-ORA}
+
+#access the msigdb gene sets
+pathways <- msigdbr::msigdbr(species = 'Homo sapiens', category = 'C8')
+
+
+#set up input for clusterProfiler
+term2gene <- pathways[,c('gs_name', 'gene_symbol')]
+
+#clean memory
+rm(pathways); gc(full = T)
+
+
+#prep ratio function same as DOSE::parse_ratio
+parse_ratio <- function(ratio){
+  ratio <- sub("^\\s*", "", as.character(ratio))
+  ratio <- sub("\\s*$", "", ratio)
+  numerator <- as.numeric(sub("/\\d+$", "", ratio))
+  denominator <- as.numeric(sub("^\\d+/", "", ratio))
+  return(numerator/denominator)
+}
+
+
+
+#loop thru clusters and perform pathway analysis
+
+clusts <- unique(m$cluster)
+
+#for each cluster, get markers, run thru pathway analysis
+ora_res_list <- lapply(clusts, function(cl){
+  
+  
+  message('Analyzing cluster ', cl)
+  
+  
+  #get markers of this cluster
+  markers_cl <- m[m$cluster == cl,"gene"]
+  
+  
+  #run analysis
+  orares <- enricher(markers_cl,
+                     TERM2GENE = term2gene, 
+                     pvalueCutoff = 0.05
+  )
+  
+  
+  #to df
+  orares <- as.data.frame(orares)
+  
+  
+  #add numeric ratio column
+  orares$GeneRatioNumeric <- parse_ratio(orares$GeneRatio)
+  
+  
+  #keep only important columns
+  orares <- orares[,c('ID', 'GeneRatio', 'GeneRatioNumeric', 'BgRatio', 'Count', 'pvalue', 'p.adjust')]
+  
+  
+  #add a cluster column
+  orares <- cbind(cl, orares)
+  colnames(orares)[1] <- 'Cluster'
+  
+  
+  
+  return(orares)
+  
+  
+})
+
+
+
+#make a plot using the top few pathways for each of them
+
+ora_res_df <- dplyr::bind_rows(ora_res_list)
+
+
+
+
+#select top pways per cluster in way that allows multiple clusters to express them
+n = 5
+top_pways <- ora_res_df %>% group_by(Cluster) %>% top_n(n = n, wt = -log(pvalue))
+top_pways_names <- unique(top_pways$ID)
+ora_res_df_top <- ora_res_df[ora_res_df$ID %in% top_pways_names,]
+
+
+
+#order by top cluster
+ora_res_df_top$ID <- factor(ora_res_df_top$ID, levels = rev(top_pways_names))
+
+
+#prep plot
+
+ggplot(ora_res_df_top, aes(Cluster, ID, size = -log(pvalue), col = GeneRatioNumeric))+
+  geom_point()
+
+
+
+
+
+```
+
+
+
+In this dotplot, the size of the dot indicates the P value of the enrichment, while the color indicates the enrichment strength. 
+
+The cell markers are pulled from various tissues but are specific to cell types.
+
+Do you notice any patterns associated with each cluster? 
+If you had to give a cluster label to each cluster, such as T cell, B cell, etcera, what would you label it as?
+
+
+
+Note that some cell types are very well studied (such as immune cells), while others may have not much in the way of published markers, so this type of analysis can bea bit difficult.
+
+
+Also note that automated cell type calling should always be carefully checked and inspected, markers checked, tissue biology experts consulted, etc, in order to prevent false identificatons.
+
+
+Cell annotation is generally the most difficult step in single-cell RNA-seq analysis, because it relies on extensive biological expertise of specific tissues to confidently call cells.
+
+
+
+
+
+# Conclusion
+
+Hopefully, this tutorial has given you an idea of the general steps of single-cell RNA-sequencing analysis.
+
+We learnt about pre-processing of 10X data, reading the data in, normalization, feature selection, PCA, clustering, marker analysis, and cell annotation.
+
+
+
+It's quiz-o-clock!
+
+
+1. Can you name some important quality metrics for scRNAseq data?
+
+2. Can you identify two important hyperparameters in scRNAseq analysis?
+
+3. Can you explain why we use normalization in scRNAseq analysis?
+
+4. Can you explain how to identify cell types from scRNAseq analysis?
+
+5. What is your favorite cell type?
+
+
+
+
+
+
+
+
+
+Answers are below, scroll all the way down, no cheating ;)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. Can you name some important quality metrics for scRNAseq data?
+
+Percent mito content, number of UMIs (transcripts detected), number of unique genes detected
+
+
+
+
+2. Can you identify two important hyperparameters in scRNAseq analysis?
+
+
+Two most important are number of PCs used and Louvain resolution. Other important ones are number of HVGs used and the k selected during KNN graph computation.
+
+
+3. Can you explain why we use normalization in scRNAseq analysis?
+
+To reduce the correlation between gene variance and gene count expression. To select Highly Variable Genes not just on the basis of those that are most highly expressed, but those that actually differ across cells.
+
+
+
+4. Can you explain how to identify cell types from scRNAseq analysis?
+
+
+Inspect markers, google markers you don't know about, run markers through databases.
+Use database-derived tools like SingleR and Azimuth.
+
+Database methods should always be treated with caution, and may not have info for less well characterized tissues / cell types.
+
+
+
+5. My favorite cell type is the osteoclast, because they're so weird.
+
+
+
+
+
+
+Thanks for your attention. We hope this was helpful and informative.
+
+
+
+
+
