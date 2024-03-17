@@ -132,7 +132,7 @@ There will only be a view-only .HTML vignette for this session. Please navigate 
 
 - For view only: navigate to [this folder](https://github.com/EinsteinOmics/OmicsWorkshop/tree/main/06_scRNA_DeyouAlex), and download the .HTML file: click on the .html file, then click the Download button top right of screen, which looks like an arrow pointing downward, or click the button with three dots on top right and click download.
 - For interactive use on HPC: see instructions above for details to either use git clone / git pull, or download the folder and transfer to HPC using samba.
-- For interactive use locally using Rstudio: download the .Rmd file from that folder. It can be opened with Rstudio. You will need to install the packages that are used in the vignette locally, which are all read in with the "library" command at the start of the vignette.
+- For interactive use locally using Rstudio: download the .Rmd file from that folder. It can be opened with Rstudio.
 
 
 <br />
